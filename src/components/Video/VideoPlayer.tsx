@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { useVideo } from '../../contexts/VideoContext';
@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   Send
 } from 'lucide-react';
-import { useState } from 'react';
 
 const VideoPlayer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +27,8 @@ const VideoPlayer: React.FC = () => {
     addToHistory,
     isLiked,
     isSubscribed,
-    getSubscriptionCount
+    getSubscriptionCount,
+    loading
   } = useVideo();
 
   const [comment, setComment] = useState('');
@@ -36,9 +36,9 @@ const VideoPlayer: React.FC = () => {
 
   const video = id ? getVideoById(id) : undefined;
   const comments = id ? getCommentsByVideoId(id) : [];
-  const isVideoLiked = user && id ? isLiked(id, user.id) : false;
-  const isUserSubscribed = user && video ? isSubscribed(video.tutorId, user.id) : false;
-  const subscriberCount = video ? getSubscriptionCount(video.tutorId) : 0;
+  const isVideoLiked = user && id ? isLiked(id) : false;
+  const isUserSubscribed = user && video ? isSubscribed(video.tutor_id) : false;
+  const subscriberCount = video ? getSubscriptionCount(video.tutor_id) : 0;
   
   // Check role from multiple sources
   const userRole = (user?.publicMetadata?.role as string) || 
@@ -47,9 +47,17 @@ const VideoPlayer: React.FC = () => {
 
   useEffect(() => {
     if (video && user) {
-      addToHistory(video.id, user.id);
+      addToHistory(video.id);
     }
   }, [video, user, addToHistory]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   if (!video) {
     return (
@@ -67,15 +75,23 @@ const VideoPlayer: React.FC = () => {
     );
   }
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (user) {
-      toggleLike(video.id, user.id);
+      try {
+        await toggleLike(video.id);
+      } catch (error) {
+        console.error('Error toggling like:', error);
+      }
     }
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (user && userRole === 'student') {
-      toggleSubscription(video.tutorId, user.id);
+      try {
+        await toggleSubscription(video.tutor_id);
+      } catch (error) {
+        console.error('Error toggling subscription:', error);
+      }
     }
   };
 
@@ -84,9 +100,14 @@ const VideoPlayer: React.FC = () => {
     if (!user || !comment.trim()) return;
 
     setIsSubmittingComment(true);
-    addComment(video.id, comment.trim(), user.id, user.firstName || user.emailAddresses[0].emailAddress);
-    setComment('');
-    setIsSubmittingComment(false);
+    try {
+      await addComment(video.id, comment.trim());
+      setComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
   const formatNumber = (num: number) => {
@@ -117,9 +138,9 @@ const VideoPlayer: React.FC = () => {
                 <video
                   controls
                   className="absolute inset-0 w-full h-full"
-                  poster={video.thumbnailUrl}
+                  poster={video.thumbnail_url}
                 >
-                  <source src={video.videoUrl} type="video/mp4" />
+                  <source src={video.video_url} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               </div>
@@ -134,17 +155,17 @@ const VideoPlayer: React.FC = () => {
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
-                    {formatDistanceToNow(new Date(video.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
-                      {video.tutorName.charAt(0)}
+                      {video.tutor?.name?.charAt(0) || 'T'}
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">{video.tutorName}</h3>
+                      <h3 className="font-medium text-gray-900">{video.tutor?.name || 'Unknown Tutor'}</h3>
                       <p className="text-sm text-gray-600">{formatNumber(subscriberCount)} subscribers</p>
                     </div>
                   </div>
@@ -226,7 +247,7 @@ const VideoPlayer: React.FC = () => {
                       className="mt-2 flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Send className="h-4 w-4" />
-                      <span>Comment</span>
+                      <span>{isSubmittingComment ? 'Posting...' : 'Comment'}</span>
                     </button>
                   </div>
                 </div>
@@ -237,13 +258,13 @@ const VideoPlayer: React.FC = () => {
               {comments.map((comment) => (
                 <div key={comment.id} className="flex space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                    {comment.userName.charAt(0)}
+                    {comment.user?.name?.charAt(0) || 'U'}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-medium text-gray-900">{comment.userName}</span>
+                      <span className="font-medium text-gray-900">{comment.user?.name || 'Unknown User'}</span>
                       <span className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                       </span>
                     </div>
                     <p className="text-gray-700">{comment.content}</p>

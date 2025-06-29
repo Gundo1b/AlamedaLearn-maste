@@ -14,8 +14,8 @@ const VideoUpload: React.FC = () => {
     description: '',
     category: 'Programming',
     tags: '',
-    thumbnailUrl: '',
-    videoUrl: '',
+    thumbnail_url: '',
+    video_url: '',
     duration: 0
   });
 
@@ -45,7 +45,7 @@ const VideoUpload: React.FC = () => {
       return;
     }
 
-    if (!formData.title || !formData.description || !formData.videoUrl) {
+    if (!formData.title || !formData.description || !formData.video_url) {
       setError('Please fill in all required fields');
       return;
     }
@@ -58,17 +58,15 @@ const VideoUpload: React.FC = () => {
         description: formData.description,
         category: formData.category,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        thumbnailUrl: formData.thumbnailUrl || 'https://images.pexels.com/photos/1114690/pexels-photo-1114690.jpeg?auto=compress&cs=tinysrgb&w=800',
-        videoUrl: formData.videoUrl,
-        duration: formData.duration || 1800,
-        tutorId: user.id,
-        tutorName: user.firstName || user.emailAddresses[0].emailAddress,
-        tutorAvatar: user.imageUrl
+        thumbnail_url: formData.thumbnail_url || 'https://images.pexels.com/photos/1114690/pexels-photo-1114690.jpeg?auto=compress&cs=tinysrgb&w=800',
+        video_url: formData.video_url,
+        duration: formData.duration || 1800
       };
 
-      uploadVideo(videoData);
+      await uploadVideo(videoData);
       navigate('/dashboard');
     } catch (err) {
+      console.error('Upload error:', err);
       setError('Failed to upload video. Please try again.');
     } finally {
       setIsUploading(false);
@@ -191,17 +189,17 @@ const VideoUpload: React.FC = () => {
 
             {/* Video URL */}
             <div>
-              <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="video_url" className="block text-sm font-medium text-gray-700 mb-2">
                 Video URL *
               </label>
               <div className="relative">
                 <Video className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <input
                   type="url"
-                  id="videoUrl"
-                  name="videoUrl"
+                  id="video_url"
+                  name="video_url"
                   required
-                  value={formData.videoUrl}
+                  value={formData.video_url}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="https://example.com/your-video.mp4"
@@ -214,16 +212,16 @@ const VideoUpload: React.FC = () => {
 
             {/* Thumbnail URL */}
             <div>
-              <label htmlFor="thumbnailUrl" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="thumbnail_url" className="block text-sm font-medium text-gray-700 mb-2">
                 Thumbnail URL
               </label>
               <div className="relative">
                 <Image className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <input
                   type="url"
-                  id="thumbnailUrl"
-                  name="thumbnailUrl"
-                  value={formData.thumbnailUrl}
+                  id="thumbnail_url"
+                  name="thumbnail_url"
+                  value={formData.thumbnail_url}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="https://example.com/thumbnail.jpg"

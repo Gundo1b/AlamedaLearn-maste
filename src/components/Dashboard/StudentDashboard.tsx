@@ -6,7 +6,7 @@ import { Search, Filter, History, Users, Play } from 'lucide-react';
 
 const StudentDashboard: React.FC = () => {
   const { user } = useUser();
-  const { videos, videoHistory, subscriptions } = useVideo();
+  const { videos, videoHistory, subscriptions, loading } = useVideo();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('browse');
@@ -16,17 +16,18 @@ const StudentDashboard: React.FC = () => {
   const filteredVideos = videos.filter(video => {
     const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          video.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         video.tutorName.toLowerCase().includes(searchTerm.toLowerCase());
+                         (video.tutor?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || video.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const userHistory = user ? videoHistory.filter(h => h.userId === user.id) : [];
-  const historyVideos = userHistory.map(h => videos.find(v => v.id === h.videoId)).filter(Boolean);
+  // Get user's history videos
+  const userHistoryVideoIds = videoHistory.map(h => h.video_id);
+  const historyVideos = videos.filter(v => userHistoryVideoIds.includes(v.id));
 
-  const userSubscriptions = user ? subscriptions.filter(s => s.studentId === user.id) : [];
-  const subscribedTutors = userSubscriptions.map(s => s.tutorId);
-  const subscribedVideos = videos.filter(v => subscribedTutors.includes(v.tutorId));
+  // Get subscribed tutors' videos
+  const subscribedTutorIds = subscriptions.map(s => s.tutor_id);
+  const subscribedVideos = videos.filter(v => subscribedTutorIds.includes(v.tutor_id));
 
   const tabs = [
     { id: 'browse', label: 'Browse', icon: Search },
@@ -41,6 +42,14 @@ const StudentDashboard: React.FC = () => {
       ))}
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -129,7 +138,7 @@ const StudentDashboard: React.FC = () => {
                     Latest from your subscriptions
                   </h2>
                   <p className="text-gray-600">
-                    You're subscribed to {userSubscriptions.length} tutor{userSubscriptions.length !== 1 ? 's' : ''}
+                    You're subscribed to {subscriptions.length} tutor{subscriptions.length !== 1 ? 's' : ''}
                   </p>
                 </div>
                 {renderVideoGrid(subscribedVideos)}

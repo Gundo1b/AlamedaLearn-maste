@@ -22,16 +22,21 @@ const TutorDashboard: React.FC = () => {
     subscriptions, 
     getTutorVideos, 
     getSubscriptionCount,
-    getCommentsByVideoId 
+    getCommentsByVideoId,
+    loading
   } = useVideo();
 
   const [activeTab, setActiveTab] = useState('overview');
 
-  const tutorVideos = user ? getTutorVideos(user.id) : [];
+  // Get current user's profile ID from videos (since we need the profile ID, not clerk ID)
+  const userVideos = videos.filter(video => video.tutor?.clerk_id === user?.id);
+  const userProfileId = userVideos[0]?.tutor_id;
+  
+  const tutorVideos = userProfileId ? getTutorVideos(userProfileId) : [];
   const totalViews = tutorVideos.reduce((sum, video) => sum + video.views, 0);
   const totalLikes = tutorVideos.reduce((sum, video) => sum + video.likes, 0);
   const totalComments = tutorVideos.reduce((sum, video) => sum + getCommentsByVideoId(video.id).length, 0);
-  const subscriberCount = user ? getSubscriptionCount(user.id) : 0;
+  const subscriberCount = userProfileId ? getSubscriptionCount(userProfileId) : 0;
 
   const stats = [
     {
@@ -65,6 +70,14 @@ const TutorDashboard: React.FC = () => {
     { id: 'videos', label: 'My Videos' },
     { id: 'analytics', label: 'Analytics' }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,7 +145,7 @@ const TutorDashboard: React.FC = () => {
                 {tutorVideos.slice(0, 5).map((video) => (
                   <div key={video.id} className="flex items-center space-x-3">
                     <img
-                      src={video.thumbnailUrl}
+                      src={video.thumbnail_url}
                       alt={video.title}
                       className="w-16 h-10 object-cover rounded"
                     />
@@ -222,7 +235,7 @@ const TutorDashboard: React.FC = () => {
                   <div key={video.id} className="border-b border-gray-200 pb-6 last:border-b-0">
                     <div className="flex items-start space-x-4">
                       <img
-                        src={video.thumbnailUrl}
+                        src={video.thumbnail_url}
                         alt={video.title}
                         className="w-24 h-16 object-cover rounded"
                       />

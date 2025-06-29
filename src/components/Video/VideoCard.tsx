@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Video } from '../../types';
+import { Video } from '../../lib/supabase';
 import { formatDistanceToNow } from 'date-fns';
 import { Play, Eye, ThumbsUp, Clock } from 'lucide-react';
 
@@ -29,7 +29,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
       <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
         <div className="relative">
           <img
-            src={video.thumbnailUrl}
+            src={video.thumbnail_url}
             alt={video.title}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
           />
@@ -45,13 +45,13 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
         <div className="p-4">
           <div className="flex items-start space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
-              {video.tutorName.charAt(0)}
+              {video.tutor?.name?.charAt(0) || 'T'}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
                 {video.title}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">{video.tutorName}</p>
+              <p className="text-sm text-gray-600 mt-1">{video.tutor?.name || 'Unknown Tutor'}</p>
               <div className="flex items-center text-xs text-gray-500 mt-2 space-x-4">
                 <div className="flex items-center">
                   <Eye className="h-3 w-3 mr-1" />
@@ -61,7 +61,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
                   <ThumbsUp className="h-3 w-3 mr-1" />
                   {formatNumber(video.likes)}
                 </div>
-                <span>{formatDistanceToNow(new Date(video.createdAt), { addSuffix: true })}</span>
+                <span>{formatDistanceToNow(new Date(video.created_at), { addSuffix: true })}</span>
               </div>
               <div className="flex flex-wrap gap-1 mt-2">
                 {video.tags.slice(0, 2).map((tag, index) => (
