@@ -198,6 +198,14 @@ const VideoUpload: React.FC = () => {
     }
   };
 
+  const triggerVideoUpload = () => {
+    videoInputRef.current?.click();
+  };
+
+  const triggerThumbnailUpload = () => {
+    thumbnailInputRef.current?.click();
+  };
+
   if (userRole !== 'tutor') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -243,15 +251,18 @@ const VideoUpload: React.FC = () => {
               </label>
               
               {!videoFile ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                <div 
+                  onClick={triggerVideoUpload}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                >
                   <Video className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <div className="space-y-2">
                     <p className="text-lg font-medium text-gray-900">Upload your video</p>
                     <p className="text-sm text-gray-600">
-                      Drag and drop your video file here, or click to browse
+                      Click here to select a video file from your computer
                     </p>
                     <p className="text-xs text-gray-500">
-                      Supports MP4, MOV, AVI (max 500MB)
+                      Supports MP4, MOV, AVI, WebM (max 500MB)
                     </p>
                   </div>
                   <input
@@ -259,7 +270,7 @@ const VideoUpload: React.FC = () => {
                     type="file"
                     accept="video/*"
                     onChange={handleVideoSelect}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    className="hidden"
                   />
                 </div>
               ) : (
@@ -296,7 +307,10 @@ const VideoUpload: React.FC = () => {
               </label>
               
               {!thumbnailPreview ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <div 
+                  onClick={triggerThumbnailUpload}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                >
                   <Image className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-gray-900">Upload thumbnail</p>
@@ -309,7 +323,7 @@ const VideoUpload: React.FC = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleThumbnailSelect}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    className="hidden"
                   />
                 </div>
               ) : (
