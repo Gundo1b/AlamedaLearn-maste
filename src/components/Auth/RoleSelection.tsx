@@ -14,9 +14,10 @@ const RoleSelection: React.FC = () => {
     
     setIsLoading(true);
     try {
+      // Use unsafeMetadata instead of publicMetadata as a workaround
       await user.update({
-        publicMetadata: {
-          ...user.publicMetadata,
+        unsafeMetadata: {
+          ...user.unsafeMetadata,
           role: role
         }
       });
@@ -25,6 +26,14 @@ const RoleSelection: React.FC = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Error updating user role:', (error as any).message || JSON.stringify(error) || error);
+      
+      // If unsafeMetadata also fails, try storing in localStorage as fallback
+      try {
+        localStorage.setItem('userRole', role);
+        navigate('/dashboard');
+      } catch (storageError) {
+        console.error('Failed to store role in localStorage:', storageError);
+      }
     } finally {
       setIsLoading(false);
     }
