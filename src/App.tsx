@@ -12,7 +12,15 @@ import VideoUpload from './components/Upload/VideoUpload';
 import RoleSelection from './components/Auth/RoleSelection';
 
 const Dashboard: React.FC = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
+  
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
   
   if (!user) return null;
   
@@ -27,6 +35,16 @@ const Dashboard: React.FC = () => {
 };
 
 const AppContent: React.FC = () => {
+  const { isLoaded } = useUser();
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Router>
@@ -37,6 +55,7 @@ const AppContent: React.FC = () => {
             <Route path="/video/:id" element={<VideoPlayer />} />
             <Route path="/upload" element={<VideoUpload />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </SignedIn>
         

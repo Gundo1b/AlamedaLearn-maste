@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { GraduationCap, BookOpen, Video } from 'lucide-react';
 
 const RoleSelection: React.FC = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<'student' | 'tutor' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,8 +21,8 @@ const RoleSelection: React.FC = () => {
         }
       });
       
-      // Force a page refresh to update the user context
-      window.location.reload();
+      // Navigate to dashboard after successful role update
+      navigate('/dashboard');
     } catch (error) {
       console.error('Error updating user role:', error);
     } finally {
