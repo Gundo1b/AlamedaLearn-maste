@@ -24,7 +24,7 @@ const RoleSelection: React.FC = () => {
       // Navigate to dashboard after successful role update
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error updating user role:', error);
+      console.error('Error updating user role:', (error as any).message || JSON.stringify(error) || error);
     } finally {
       setIsLoading(false);
     }
