@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { SignedIn, SignedOut, useUser } from '@clerk/clerk-react';
 import { VideoProvider } from './contexts/VideoContext';
 import Header from './components/Layout/Header';
 import Login from './components/Auth/Login';
@@ -9,53 +9,45 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import TutorDashboard from './components/Dashboard/TutorDashboard';
 import VideoPlayer from './components/Video/VideoPlayer';
 import VideoUpload from './components/Upload/VideoUpload';
-import ProtectedRoute from './components/ProtectedRoute';
-import { useAuth } from './contexts/AuthContext';
+import RoleSelection from './components/Auth/RoleSelection';
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   
   if (!user) return null;
   
-  return user.role === 'student' ? <StudentDashboard /> : <TutorDashboard />;
+  // Check if user has selected a role
+  const userRole = user.publicMetadata?.role as string;
+  
+  if (!userRole) {
+    return <RoleSelection />;
+  }
+  
+  return userRole === 'student' ? <StudentDashboard /> : <TutorDashboard />;
 };
 
 const AppContent: React.FC = () => {
-  const { user } = useAuth();
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Router>
-        {user && <Header />}
-        <Routes>
-          <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-          <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/video/:id" 
-            element={
-              <ProtectedRoute>
-                <VideoPlayer />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/upload" 
-            element={
-              <ProtectedRoute>
-                <VideoUpload />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
-        </Routes>
+        <SignedIn>
+          <Header />
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/video/:id" element={<VideoPlayer />} />
+            <Route path="/upload" element={<VideoUpload />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </SignedIn>
+        
+        <SignedOut>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        </SignedOut>
       </Router>
     </div>
   );
@@ -63,11 +55,9 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <VideoProvider>
-        <AppContent />
-      </VideoProvider>
-    </AuthProvider>
+    <VideoProvider>
+      <AppContent />
+    </VideoProvider>
   );
 }
 

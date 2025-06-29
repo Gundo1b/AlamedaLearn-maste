@@ -1,16 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { Video, LogOut, User, Upload, Home } from 'lucide-react';
+import { useUser, UserButton } from '@clerk/clerk-react';
+import { Video, Upload, Home } from 'lucide-react';
 
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const userRole = user?.publicMetadata?.role as string;
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -31,7 +28,7 @@ const Header: React.FC = () => {
                 <span>Dashboard</span>
               </Link>
 
-              {user.role === 'tutor' && (
+              {userRole === 'tutor' && (
                 <Link
                   to="/upload"
                   className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
@@ -43,20 +40,21 @@ const Header: React.FC = () => {
 
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-700">{user.name}</span>
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {user.role}
-                  </span>
+                  <span className="text-sm text-gray-700">{user.firstName || user.emailAddresses[0].emailAddress}</span>
+                  {userRole && (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                      {userRole}
+                    </span>
+                  )}
                 </div>
                 
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-1 text-gray-700 hover:text-red-600 transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </button>
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8"
+                    }
+                  }}
+                />
               </div>
             </nav>
           )}

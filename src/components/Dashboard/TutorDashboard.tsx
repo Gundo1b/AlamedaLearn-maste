@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { useVideo } from '../../contexts/VideoContext';
 import VideoCard from '../Video/VideoCard';
 import { 
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const TutorDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { 
     videos, 
     comments, 

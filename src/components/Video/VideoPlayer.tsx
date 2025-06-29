@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { useVideo } from '../../contexts/VideoContext';
 import { formatDistanceToNow } from 'date-fns';
 import { 
@@ -18,7 +18,7 @@ import { useState } from 'react';
 const VideoPlayer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useUser();
   const {
     getVideoById,
     getCommentsByVideoId,
@@ -39,6 +39,7 @@ const VideoPlayer: React.FC = () => {
   const isVideoLiked = user && id ? isLiked(id, user.id) : false;
   const isUserSubscribed = user && video ? isSubscribed(video.tutorId, user.id) : false;
   const subscriberCount = video ? getSubscriptionCount(video.tutorId) : 0;
+  const userRole = user?.publicMetadata?.role as string;
 
   useEffect(() => {
     if (video && user) {
@@ -69,7 +70,7 @@ const VideoPlayer: React.FC = () => {
   };
 
   const handleSubscribe = () => {
-    if (user && user.role === 'student') {
+    if (user && userRole === 'student') {
       toggleSubscription(video.tutorId, user.id);
     }
   };
@@ -79,7 +80,7 @@ const VideoPlayer: React.FC = () => {
     if (!user || !comment.trim()) return;
 
     setIsSubmittingComment(true);
-    addComment(video.id, comment.trim(), user.id, user.name);
+    addComment(video.id, comment.trim(), user.id, user.firstName || user.emailAddresses[0].emailAddress);
     setComment('');
     setIsSubmittingComment(false);
   };
@@ -157,7 +158,7 @@ const VideoPlayer: React.FC = () => {
                       <span>{formatNumber(video.likes)}</span>
                     </button>
                     
-                    {user?.role === 'student' && (
+                    {userRole === 'student' && (
                       <button
                         onClick={handleSubscribe}
                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
@@ -205,7 +206,7 @@ const VideoPlayer: React.FC = () => {
               <form onSubmit={handleCommentSubmit} className="mb-6">
                 <div className="flex space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
-                    {user.name.charAt(0)}
+                    {(user.firstName || user.emailAddresses[0].emailAddress).charAt(0)}
                   </div>
                   <div className="flex-1">
                     <textarea

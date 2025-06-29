@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { useVideo } from '../../contexts/VideoContext';
 import VideoCard from '../Video/VideoCard';
 import { Search, Filter, History, Users, Play } from 'lucide-react';
 
 const StudentDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { videos, videoHistory, subscriptions } = useVideo();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -47,7 +47,7 @@ const StudentDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.name}!
+            Welcome back, {user?.firstName || 'Student'}!
           </h1>
           <p className="text-gray-600">Discover new knowledge and continue your learning journey</p>
         </div>

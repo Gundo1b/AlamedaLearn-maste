@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 import { useVideo } from '../../contexts/VideoContext';
 import { Upload, Video, Image, Tag, FileText, ArrowLeft } from 'lucide-react';
 
 const VideoUpload: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const { uploadVideo } = useVideo();
   const navigate = useNavigate();
 
@@ -23,6 +23,7 @@ const VideoUpload: React.FC = () => {
   const [error, setError] = useState('');
 
   const categories = ['Programming', 'Design', 'Business', 'Science', 'Language', 'Other'];
+  const userRole = user?.publicMetadata?.role as string;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -57,8 +58,8 @@ const VideoUpload: React.FC = () => {
         videoUrl: formData.videoUrl,
         duration: formData.duration || 1800,
         tutorId: user.id,
-        tutorName: user.name,
-        tutorAvatar: user.avatar
+        tutorName: user.firstName || user.emailAddresses[0].emailAddress,
+        tutorAvatar: user.imageUrl
       };
 
       uploadVideo(videoData);
@@ -70,7 +71,7 @@ const VideoUpload: React.FC = () => {
     }
   };
 
-  if (user?.role !== 'tutor') {
+  if (userRole !== 'tutor') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
