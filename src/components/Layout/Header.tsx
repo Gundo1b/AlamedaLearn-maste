@@ -7,7 +7,10 @@ const Header: React.FC = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const userRole = user?.publicMetadata?.role as string;
+  // Check role from multiple sources
+  const userRole = (user?.publicMetadata?.role as string) || 
+                   (user?.unsafeMetadata?.role as string) || 
+                   localStorage.getItem('userRole');
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">

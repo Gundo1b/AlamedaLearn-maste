@@ -23,7 +23,11 @@ const VideoUpload: React.FC = () => {
   const [error, setError] = useState('');
 
   const categories = ['Programming', 'Design', 'Business', 'Science', 'Language', 'Other'];
-  const userRole = user?.publicMetadata?.role as string;
+  
+  // Check role from multiple sources
+  const userRole = (user?.publicMetadata?.role as string) || 
+                   (user?.unsafeMetadata?.role as string) || 
+                   localStorage.getItem('userRole');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({

@@ -24,8 +24,10 @@ const Dashboard: React.FC = () => {
   
   if (!user) return null;
   
-  // Check if user has selected a role
-  const userRole = user.publicMetadata?.role as string;
+  // Check if user has selected a role - check both metadata locations and localStorage fallback
+  const userRole = (user.publicMetadata?.role as string) || 
+                   (user.unsafeMetadata?.role as string) || 
+                   localStorage.getItem('userRole');
   
   if (!userRole) {
     return <RoleSelection />;

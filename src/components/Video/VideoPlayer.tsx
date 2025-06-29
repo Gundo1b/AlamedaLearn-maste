@@ -39,7 +39,11 @@ const VideoPlayer: React.FC = () => {
   const isVideoLiked = user && id ? isLiked(id, user.id) : false;
   const isUserSubscribed = user && video ? isSubscribed(video.tutorId, user.id) : false;
   const subscriberCount = video ? getSubscriptionCount(video.tutorId) : 0;
-  const userRole = user?.publicMetadata?.role as string;
+  
+  // Check role from multiple sources
+  const userRole = (user?.publicMetadata?.role as string) || 
+                   (user?.unsafeMetadata?.role as string) || 
+                   localStorage.getItem('userRole');
 
   useEffect(() => {
     if (video && user) {
