@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://keiekkphbnykwagddkig.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlaWVra3BoYm55a3dhZ2Rka2lnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1MzA5MDAsImV4cCI6MjA2ODEwNjkwMH0.Kci432fsQIq0ZTbjx7kiYmFsaA-80QnyQrs3TwiZ8kU"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_Y29udGVudC10aWNrLTExLmNsZXJrLmFjY291bnRzLmRldiQ"
+  CLERK_SECRET_KEY = "sk_test_iLaeHTRimJT4x4WO665ehiWeWzIf2u82VrbbHqvyIN"

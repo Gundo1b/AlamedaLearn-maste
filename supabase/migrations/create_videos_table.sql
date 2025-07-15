@@ -1,0 +1,7 @@
+CREATE TABLE videos (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  title TEXT NOT NULL,
+  description TEXT,
+  url TEXT NOT NULL,
+  topic_id BIGINT REFERENCES topics(id)
+);

@@ -1,0 +1,6 @@
+CREATE TABLE subjects (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  name TEXT NOT NULL,
+  description TEXT,
+  grade_id BIGINT REFERENCES grades(id)
+);
